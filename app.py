@@ -2,18 +2,37 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import sqlite3
-import tensorflow as tf
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import LSTM, Dense, Dropout
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_squared_error, mean_absolute_error
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import pickle
 import os
 from datetime import datetime, timedelta
 import warnings
 warnings.filterwarnings('ignore')
+
+# Try to import TensorFlow and related libraries
+try:
+    import tensorflow as tf
+    from tensorflow.keras.models import Sequential, load_model
+    from tensorflow.keras.layers import LSTM, Dense, Dropout
+    TF_AVAILABLE = True
+except ImportError:
+    TF_AVAILABLE = False
+    st.error("⚠️ TensorFlow is not installed. Please install it using: `pip install tensorflow`")
+
+try:
+    from sklearn.preprocessing import MinMaxScaler
+    from sklearn.metrics import mean_squared_error, mean_absolute_error
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+    st.error("⚠️ Scikit-learn is not installed. Please install it using: `pip install scikit-learn`")
+
+try:
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
+    st.error("⚠️ Plotly is not installed. Please install it using: `pip install plotly`")
 
 # Set page configuration
 st.set_page_config(
@@ -139,6 +158,9 @@ class BitcoinLSTMPredictor:
     
     def prepare_data(self, df, target_column='close'):
         """Prepare data for LSTM training"""
+        if not SKLEARN_AVAILABLE:
+            raise ImportError("Scikit-learn is required for data preprocessing")
+            
         # Use only the target column for prediction
         data = df[target_column].values.reshape(-1, 1)
         
@@ -159,6 +181,9 @@ class BitcoinLSTMPredictor:
     
     def build_model(self, input_shape):
         """Build LSTM model"""
+        if not TF_AVAILABLE:
+            raise ImportError("TensorFlow is required for model building")
+            
         model = Sequential([
             LSTM(units=50, return_sequences=True, input_shape=input_shape),
             Dropout(0.2),
@@ -227,9 +252,62 @@ class BitcoinLSTMPredictor:
         except:
             return False
 
+def check_dependencies():
+    """Check if all required dependencies are available"""
+    missing_deps = []
+    
+    if not TF_AVAILABLE:
+        missing_deps.append("tensorflow")
+    if not SKLEARN_AVAILABLE:
+        missing_deps.append("scikit-learn")
+    if not PLOTLY_AVAILABLE:
+        missing_deps.append("plotly")
+    
+    return missing_deps
+
+def show_installation_guide():
+    """Show installation guide for missing dependencies"""
+    st.error("🚫 Missing Required Dependencies")
+    
+    st.markdown("""
+    ### Installation Instructions:
+    
+    1. **Install using pip:**
+    ```bash
+    pip install tensorflow scikit-learn plotly
+    ```
+    
+    2. **Or install all dependencies from requirements.txt:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+    
+    3. **For Streamlit Cloud/Sharing:**
+    Make sure your requirements.txt contains:
+    ```
+    streamlit>=1.28.0
+    pandas>=2.0.0
+    numpy>=1.24.0
+    tensorflow>=2.13.0
+    scikit-learn>=1.3.0
+    plotly>=5.15.0
+    ```
+    
+    4. **Restart the application** after installation.
+    """)
+    
+    st.info("💡 **Note:** If you're using Streamlit Cloud, make sure the requirements.txt file is in your repository root.")
+
 def main():
     st.title("₿ Bitcoin LSTM Price Predictor")
     st.markdown("---")
+    
+    # Check dependencies
+    missing_deps = check_dependencies()
+    
+    if missing_deps:
+        show_installation_guide()
+        st.stop()
     
     # Initialize predictor
     predictor = BitcoinLSTMPredictor()
