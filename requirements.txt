@@ -3,28 +3,36 @@ streamlit>=1.28.0
 pandas>=2.0.0
 numpy>=1.24.0
 
-# Machine Learning
+# Machine Learning - Choose based on your system
+# For most systems (CPU version):
 tensorflow>=2.13.0
+
+# For systems with GPU support (uncomment if needed):
+# tensorflow-gpu>=2.13.0
+
+# Alternative lightweight option (uncomment if TensorFlow fails):
+# keras>=2.13.0
+
+# Data Processing and ML utilities
 scikit-learn>=1.3.0
 
 # Data Visualization
 plotly>=5.15.0
 
-# Data Processing
-pickle-mixin>=1.0.2
+# Utilities (included in Python standard library, no install needed)
+# sqlite3 - Built into Python
+# pickle - Built into Python
+# datetime - Built into Python
 
-# Database (SQLite3 is included in Python standard library)
-# No additional package needed for sqlite3
-
-# Additional utilities that might be helpful
+# Optional: Enhanced visualizations
 matplotlib>=3.7.0
 seaborn>=0.12.0
 
 # Optional: For better performance
-numba>=0.57.0
+# numba>=0.57.0
 
-# Optional: For data validation
-pydantic>=2.0.0
-
-# Optional: For progress bars (already included in streamlit)
+# Optional: Progress bars
 tqdm>=4.65.0
+
+# For deployment on cloud platforms
+# gunicorn>=20.1.0  # Uncomment for production deployment
